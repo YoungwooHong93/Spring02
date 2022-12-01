@@ -7,10 +7,16 @@ import vo.MemberVO;
 
 public interface MemberService {
 	
-	// ** SearchCriteria PageList
-	List<MemberVO>searchList(SearchCriteria cri);
-	int searchCount(SearchCriteria cri);
+	// ** axRSDetail
+	MemberVO rsDetail(String id, Integer jno);
 	
+	// ** Member Check List
+	List<MemberVO> checkList(MemberVO vo);
+	
+	// ** SearchCriteria PageList
+	List<MemberVO> searchList(SearchCriteria cri);
+	int searchCount(SearchCriteria cri);
+
 	// ** selectList
 	List<MemberVO> selectList();
 
@@ -26,4 +32,4 @@ public interface MemberService {
 	// ** Delete
 	int delete(MemberVO vo);
 
-}
+} //class

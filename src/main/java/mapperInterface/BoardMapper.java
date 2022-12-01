@@ -8,34 +8,33 @@ import vo.BoardVO;
 
 public interface BoardMapper {
 	
+	// ** Board Check List
+	List<BoardVO> checkList(SearchCriteria cri);
+	int checkCount(SearchCriteria cri);
+	
 	// ** Criteria PageList
 	// => ver02
 	List<BoardVO> searchList(SearchCriteria cri);
 	int searchCount(SearchCriteria cri);
 	
-	// => ver01
+	// => ver01 
 	List<BoardVO> criList(Criteria cri);
 	int criTotalCount();
 	
 	// ** selectList
 	List<BoardVO> selectList();
-	
 	// ** selectOne
 	BoardVO selectOne(BoardVO vo);
-	
-	// ** Insert : 새 게시물 작성
+	// ** Insert: 새글등록 
 	int insert(BoardVO vo);
-	
-	// ** Update : 게시물 수정
+	// ** Update: 글수정
 	int update(BoardVO vo);
-	
-	// ** Delete : 게시물 삭제
+	// ** Delete
 	int delete(BoardVO vo);
-	
-	// ** CountUp : 조회수 증가
+	// ** 조회수 증가
 	int countUp(BoardVO vo);
 	
-	// ** Reply insert : 답글 달기
+	// ** Reply Insert
 	int stepUpdate(BoardVO vo);
 	int rinsert(BoardVO vo);
 	

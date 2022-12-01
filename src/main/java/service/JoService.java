@@ -2,22 +2,21 @@ package service;
 
 import java.util.List;
 
+import vo.BoardVO;
 import vo.JoVO;
 
 public interface JoService {
+
 	// ** selectList
 	List<JoVO> selectList();
-	
 	// ** selectOne
-	JoVO selectOne(JoVO VO);
+	JoVO selectOne(JoVO vo);
 	
 	// ** Insert
-	int jinsert(JoVO vo);
-	
+	int insert(JoVO vo);
 	// ** Update
-	int jupdate(JoVO vo);
-	
+	int update(JoVO vo);
 	// ** Delete
-	int jdelete(JoVO vo);
+	int delete(JoVO vo);
 	
-}
+} //class

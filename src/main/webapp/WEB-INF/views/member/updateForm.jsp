@@ -4,14 +4,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
+<meta charset="UTF-8">
 	<title>** Member Update Spring_MVC2 **</title>
-	<link rel="stylesheet" type="text/css" href="/resources/myLib/myStyle.css">
+	<link rel="stylesheet" type="text/css" href="resources/myLib/myStyle.css">
+	<script src="resources/myLib/jquery-3.2.1.min.js"></script>
 </head>
 <body>
 <h2>** Member Update Spring_MVC2 **</h2>
 
-<form action="mupdate" method="post">
+<form action="mupdate" method="post" enctype="multipart/form-data">
 	<table>
 		<tr height="40"><td bgcolor="GreenYellow ">I D</td>
 			<td><input type="text" name="id" id="id" size="20" value="${apple.id}" readonly ></td></tr>
@@ -101,6 +102,27 @@
 			<td><input type="text" name="age" id="age" value="${apple.age}"></td></tr>
 		<tr height="40"><td bgcolor="GreenYellow ">Point</td>
 			<td><input type="text" name="point" id="point" value="${apple.point}"></td></tr>
+		
+		<!-- Image Update 추가 
+			=> tr Tag 추가, form Tag 속성(method, enctype) 확인 -->		
+		<tr height="40"><td bgcolor="GreenYellow ">Image</td>
+			<td><img src="${apple.uploadfile}" class="select_img" width="80" height="100">
+				<input type="hidden" name="uploadfile" value="${apple.uploadfile}"><br>
+				<input type="file" name="uploadfilef" id="uploadfilef">
+				<script>
+					$('#uploadfilef').change(function(){
+						if(this.files && this.files[0]) {
+							var reader = new FileReader;
+							reader.readAsDataURL(this.files[0]);
+				 			reader.onload = function(e) {
+			 					$(".select_img").attr("src", e.target.result)
+			 									.width(80).height(100); 
+			 				} // onload_function
+				 		} // if	
+					}); //change
+				</script>
+			</td></tr>
+		
 		<tr height="40"><td></td>
 			<td><input type="submit" value="수정">&nbsp;&nbsp;
 				<input type="reset" value="취소">
