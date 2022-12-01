@@ -6,7 +6,7 @@ import lombok.Data;
 public class SearchCriteria extends Criteria {
 	
 	private String searchType;
-	
 	private String keyword;
-	
-} // class
+	private String[] check;  // 필요시 사용
+
+} //class

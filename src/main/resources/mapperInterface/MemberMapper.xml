@@ -1,51 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
- <mapper namespace="mapperInterface.MemberMapper">
-  
-<!--
+<mapper namespace="mapperInterface.MemberMapper">
+<!--  
 ** interface 를 통해 ~Mapper 접근
 => interface ~Mapper.java 의 패키지명 & 화일명과  
    ~Mapper.xml 의 패키지명 & 화일명 & namespace 값은 같아야됨. 
    
 => namespace: 자바클래스에서 mapper 를 찾는 경로
-           다른 mapper와 중복되지 않도록 네임스페이스 기재   
+			  다른 mapper와 중복되지 않도록 네임스페이스 기재   
 
 *** mapper 기본문법 
 1) #{id} : parameter 로 전달된 vo 의 id 라는 컬럼의 value 가 전달됨  
-         -> getId() 와 동일한 의미. Map의 경우 키값이 id 인 값을 찾음    
-2) ${id} : id 라는 필드 표현 
-         
+		   -> getId() 로 처리함, Map의 경우 키값이 id 인 값을 찾음.
+		    
+2) ${id} : 필드를 표현 (매개변수로 전달된 객체의 id 컬럼의 값을 table의 컬럼으로 인식하고 적용함)    
+		   
 3) CDATA : XML에서는  <,>등 비교연산자의 경우 XML규칙상 에러 나기때문에,
-         이기호를 연산자로 인식하도록 하기 위해서는 SQL문을 CDATA로 묶어 주어야 한다.
-         <![CDATA[ SELECT * FROM table WHERE id > 1 ]]>
-         
-4) 조건문, 반복문, include, selectKey 등          
+		   이기호를 연산자로 인식하도록 하기 위해서는 SQL문을 CDATA로 묶어 주어야 한다.
+		   <![CDATA[ SELECT * FROM table WHERE id > 1 ]]>
+		   
+4) 조건문, 반복문, include, selectKey 등 		   
 -->
 
-<!-- =============== SearchCriteria PageList ==================== -->
+<!-- ** 반복문 : Member Check List 
+=> select * from member where lev in ('A','B','C') order by id asc (추천)
+   select * from member where lev='A' OR lev='B' OR lev='C' order by id asc (비추)
+=> mapper 에 반복문 적용하기 : <foreach..... 
+   비교 Java for : for ( String lev : levArr )   
+   
+=> mapper foreach 기본형식
+	<foreach ...index="index"..>   
+              ...... "${index}" : index 값 사용하기 
+                      사용하지 않는경우 아래처럼 표시해도 되고, 생략해도됨.
+   <foreach .... index="" open="(" close=")" separator=",">  	
+      	
+=> collection : list 또는 array Type 의 매개변수 (vo에 정의된 변수 사용)	
+   item : collection 의  데이터 를 1건씩 전달 받으며 위의 구문을 완성함. 	
+   index : 필요시 사용,  0 부터 시작 (0,1,2...)  
+   
+=> Oracle, DECODE 적용예  
+	~  DECODE(lev,'A','관리자','B','나무','C','잎새','새싹') lev, ~~
+-->
+
+<select id="checkList" resultType="vo.MemberVO">
+	select * from member 
+	where jno in
+	<foreach collection="check" item="it" open="(" close=")" separator=",">
+		#{it}
+	</foreach>     
+	order by jno asc, id asc
+</select>
+
+<!-- ** SearchCriteria PageList ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <sql id="search">
 	<if test="keyword!=null">
 		<bind name="keyVal" value="'%' + keyword + '%'" />
-	</if>
+	</if> 
 	<choose>
-		<when test="searchType == 'i'.toString()">
+		<when test="searchType=='i'.toString()">
 			and id like #{keyVal} )
 		</when>
-		<when test="searchType == 'a'.toString()">
+		<when test="searchType=='a'.toString()">
 			and name like #{keyVal} )
 		</when>
-		<when test="searchType == 'f'.toString()">
+		<when test="searchType=='f'.toString()">
 			and info like #{keyVal} )
 		</when>
-		<when test="searchType == 'j'.toString()">
+		<when test="searchType=='j'.toString()">
 			and jno like #{keyVal} )
 		</when>
-		<when test="searchType == 'b'.toString()">
+		<when test="searchType=='b'.toString()">
 			and birthday like #{keyVal} )
 		</when>
-		<when test="searchType == 'in'.toString()">
-			and id like #{keyVal}
+		<when test="searchType=='in'.toString()">
+			and id like #{keyVal} 
 			or name like #{keyVal} )
 		</when>
 		<otherwise> )</otherwise>
@@ -54,47 +83,51 @@
 
 <select id="searchList" resultType="vo.MemberVO">
 	select * from member 
-  	where ( id != "admin" <include refid="search"></include>
-  	order by id asc
-  	limit #{sno}, #{rowsPerPage}
+	where ( id != "admin" <include refid="search"></include>
+	order by id asc
+	limit #{sno}, #{rowsPerPage}
 </select>
 
 <select id="searchCount" resultType="int">
 	select count(*) from member
 	where ( id != "admin" <include refid="search"></include>
 </select>
-<!-- ============================================================ -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-<!-- JUnit Test : totalCount
- 	 => admin을 제외한 전체 member count 메서드 추가하는 Test  
- 	 => MemberMapper interface 에 등록 해야 Test 가능  -->
+<!--  ** Junit Test : totalCount
+ 		=> admin을 제외한 전체 member count 메서드 추가후 Test   
+ 		=> MemberMapper interface 등록 해야함      -->
 <select id="totalCount" resultType="int">
-	select count(*) from member where id != 'admin'
+	select count(*) from member where id != "admin"
 </select>
 
-  <select id="selectList" resultType="vo.MemberVO">
-<!--    	select * from member where id <> "admin" <> 때문에 오류남. -->
-<![CDATA[select * from member where id <> "admin"]]>
+<!-- ** <![CDATA[ 사용 -->
+<select id="selectList" resultType="vo.MemberVO">
+	<![CDATA[select * from member where id <> "admin"]]>
 </select>
 
 <select id="selectOne" resultType="vo.MemberVO">
-	select * from member where id = #{id}
+	select * from member where id=#{id}
 </select>
- <!-- #{id} : parameter 로 전달된 vo 의 id 라는 컬럼의 value 가 전달됨  
-           -> getId() 로 처리함   -->
+<!-- #{id} : parameter 로 전달된 vo 의 id 라는 컬럼의 value 가 전달됨 -->
 
 <insert id="insert">
-	insert into member values (#{id},#{password},#{name},
-	#{info},#{birthday},#{jno},#{age},#{point})
+	insert into member values(#{id},#{password},#{name},
+	#{info},#{birthday},#{jno},#{age},#{point},#{uploadfile})
 </insert>
 
 <update id="update">
 	update member set password=#{password}, name=#{name}, info=#{info},
-	birthday=#{birthday}, jno=#{jno}, age=#{age}, point=#{point} where id=#{id}
-</update>
-
+	birthday=#{birthday}, jno=#{jno}, age=#{age}, point=#{point}, uploadfile=#{uploadfile} where id=#{id}
+</update>		     
+		     
 <delete id="delete">
 	delete from member where id=#{id}
-</delete>
-  
- </mapper>
+</delete>		
+     
+<!-- REST API , @Param 적용 Test -->
+<select id="rsDetail" resultType="vo.MemberVO">
+	select * from member where id=#{id} and jno=#{jno}
+</select>
+
+</mapper>  
